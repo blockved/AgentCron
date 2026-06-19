@@ -6,6 +6,7 @@ import traceIdPlugin from "./plugins/trace-id.js";
 import errorHandlerPlugin from "./plugins/error-handler.js";
 import authPlugin from "./plugins/auth.js";
 import { log } from "./logger.js";
+import authRoutes from "./modules/auth/auth.routes.js";
 
 export async function buildApp() {
   const config = loadConfig();
@@ -18,6 +19,8 @@ export async function buildApp() {
   await app.register(errorHandlerPlugin);
   await app.register(prismaPlugin);
   await app.register(authPlugin);
+
+  await app.register(authRoutes, { prefix: "/api/auth" });
 
   return app;
 }
