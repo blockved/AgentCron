@@ -4,10 +4,43 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password}
       MYSQL_DATABASE: agentcron
     volumes:
       - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      target: api
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD:-password}@mysql:3306/agentcron
+      MASTER_KEY: ${MASTER_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      DATA_DIR: /data
+      PORT: "3000"
+    volumes:
+      - agentcron-data:/data
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      target: web
+    ports:
+      - "3001:3000"
+    depends_on:
+      - api
 
 volumes:
   mysql-data:
+  agentcron-data:
