@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Task {
+  id                 BigInt    @id @default(autoincrement())
+  name               String    @db.VarChar(255)
+  description        String?   @db.Text
+  agentType          String    @map("agent_type") @db.VarChar(64)
+  project            String?   @db.VarChar(255)
+  taskPrompt         String    @map("task_prompt") @db.Text
+  schedule           Json
+  sessionPolicy      String    @map("session_policy") @db.VarChar(32)
+  concurrencyPolicy  String    @default("skip_if_running") @map("concurrency_policy") @db.VarChar(32)
+  environment        Json
+  permissionPolicy   Json      @map("permission_policy")
+  notificationConfig Json      @map("notification_config")
+  timeoutSeconds     Int       @default(3600) @map("timeout_seconds")
+  maxRetries         Int       @default(0) @map("max_retries")
+  status             String    @db.VarChar(32)
+  ownerId            BigInt    @map("owner_id")
+  createdById        BigInt    @map("created_by_id")
+  nextRunAt          DateTime? @map("next_run_at")
+  lastRunAt          DateTime? @map("last_run_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  deletedAt          DateTime? @map("deleted_at")
+  runs               Run[]
+
+  @@index([status, nextRunAt])
+  @@index([ownerId, deletedAt])
+  @@map("tasks")
+}
+
+model Run {
+  id            BigInt    @id @default(autoincrement())
+  taskId        BigInt    @map("task_id")
+  sessionId     String?   @map("session_id") @db.VarChar(255)
+  trigger       String    @db.VarChar(32)
+  triggeredById BigInt?   @map("triggered_by_id")
+  status        String    @db.VarChar(32)
+  startedAt     DateTime? @map("started_at")
+  finishedAt    DateTime? @map("finished_at")
+  duration      Int?
+  resultSummary String?   @map("result_summary") @db.Text
+  errorMessage  String?   @map("error_message") @db.Text
+  riskLevel     String?   @map("risk_level") @db.VarChar(16)
+  needsReview   Boolean   @default(false) @map("needs_review")
+  artifactLinks Json?     @map("artifact_links")
+  notifyStatus  String?   @map("notify_status") @db.VarChar(32)
+  scheduledFor  DateTime  @map("scheduled_for")
+  claimedBy     String?   @map("claimed_by") @db.VarChar(64)
+  claimedAt     DateTime? @map("claimed_at")
+  heartbeatAt   DateTime? @map("heartbeat_at")
+  attemptNo     Int       @default(1) @map("attempt_no")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  task          Task      @relation(fields: [taskId], references: [id])
+  logs          TaskRunLog[]
+  artifacts     TaskRunArtifact[]
+
+  @@index([status, scheduledFor])
+  @@index([taskId, createdAt])
+  @@index([claimedBy, heartbeatAt])
+  @@map("runs")
+}
+
+model TaskRunLog {
+  id        BigInt   @id @default(autoincrement())
+  runId     BigInt   @map("run_id")
+  logType   String   @map("log_type") @db.VarChar(32)
+  content   String?  @db.Text
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  run       Run      @relation(fields: [runId], references: [id])
+
+  @@index([runId, createdAt])
+  @@map("task_run_logs")
+}
+
+model TaskRunArtifact {
+  id           BigInt   @id @default(autoincrement())
+  runId        BigInt   @map("run_id")
+  artifactType String   @map("artifact_type") @db.VarChar(64)
+  name         String   @db.VarChar(255)
+  url          String?  @db.Text
+  storagePath  String?  @map("storage_path") @db.VarChar(512)
+  metadata     Json?
+  createdAt    DateTime @default(now()) @map("created_at")
+  run          Run      @relation(fields: [runId], references: [id])
+
+  @@index([runId])
+  @@map("task_run_artifacts")
+}
+
+model Session {
+  id        String   @id @db.VarChar(255)
+  agentType String   @map("agent_type") @db.VarChar(64)
+  baseDir   String?  @map("base_dir") @db.Text
+  status    String   @db.VarChar(32)
+  directory String?  @db.Text
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("sessions")
+}
+
+model User {
+  id           BigInt   @id @default(autoincrement())
+  username     String   @unique @db.VarChar(128)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  role         String   @default("member") @db.VarChar(32)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model IdempotencyKey {
+  id        BigInt   @id @default(autoincrement())
+  key       String   @unique @db.VarChar(255)
+  response  Json
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("idempotency_keys")
+}
