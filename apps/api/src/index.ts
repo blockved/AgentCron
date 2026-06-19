@@ -8,6 +8,7 @@ import authPlugin from "./plugins/auth.js";
 import { log } from "./logger.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import taskRoutes from "./modules/task/task.routes.js";
+import runRoutes, { taskRunRoutes } from "./modules/run/run.routes.js";
 
 export async function buildApp() {
   const config = loadConfig();
@@ -23,6 +24,8 @@ export async function buildApp() {
 
   await app.register(authRoutes, { prefix: "/api/auth" });
   await app.register(taskRoutes, { prefix: "/api/tasks" });
+  await app.register(taskRunRoutes, { prefix: "/api/tasks/:id/runs" });
+  await app.register(runRoutes, { prefix: "/api/runs" });
 
   return app;
 }
