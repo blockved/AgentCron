@@ -14,7 +14,7 @@ export class AuthService {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) return null;
     return {
-      userId: user.id,
+      userId: user.id.toString(),
       username: user.username,
       role: user.role as JwtPayload["role"],
     };

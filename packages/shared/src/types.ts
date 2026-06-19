@@ -50,7 +50,7 @@ export interface NotificationChannel {
 }
 
 export interface JwtPayload {
-  userId: bigint;
+  userId: string;
   username: string;
   role: UserRole;
 }

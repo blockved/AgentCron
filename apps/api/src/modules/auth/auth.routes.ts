@@ -56,7 +56,7 @@ export default async function authRoutes(app: FastifyInstance) {
 
   app.get("/me", { preHandler: [app.authenticate] }, async (request) => {
     const user = await authService.getUserById(
-      BigInt(request.currentUser.userId as unknown as string)
+      BigInt(request.currentUser.userId)
     );
     if (!user) {
       return { code: 40400, data: null, message: "User not found", traceId: request.traceId };
