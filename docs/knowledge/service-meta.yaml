@@ -1,0 +1,14 @@
+service: AgentCron
+display_name: AgentCron
+domain: # <!-- TODO: 待确认 -->
+role: # <!-- TODO: gateway | orchestrator | domain | platform -->
+repo: # <!-- TODO: repo url -->
+owners:
+  # - <!-- TODO: owner team -->
+upstreams: []
+downstreams: []
+owned_data: []
+published_events: []
+consumed_events: []
+capabilities: []
+status_entities: []

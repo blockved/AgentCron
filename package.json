@@ -1,0 +1,18 @@
+{
+  "name": "agentcron",
+  "private": true,
+  "scripts": {
+    "dev:api": "pnpm --filter @agentcron/api dev",
+    "dev:web": "pnpm --filter @agentcron/web dev",
+    "build": "pnpm -r build",
+    "test": "pnpm --filter @agentcron/api test",
+    "test:unit": "pnpm --filter @agentcron/api test:unit",
+    "db:migrate": "pnpm --filter @agentcron/api db:migrate",
+    "db:generate": "pnpm --filter @agentcron/api db:generate",
+    "db:seed": "pnpm --filter @agentcron/api db:seed",
+    "lint": "pnpm -r lint"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
