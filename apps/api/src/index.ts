@@ -7,6 +7,7 @@ import errorHandlerPlugin from "./plugins/error-handler.js";
 import authPlugin from "./plugins/auth.js";
 import { log } from "./logger.js";
 import authRoutes from "./modules/auth/auth.routes.js";
+import taskRoutes from "./modules/task/task.routes.js";
 
 export async function buildApp() {
   const config = loadConfig();
@@ -21,6 +22,7 @@ export async function buildApp() {
   await app.register(authPlugin);
 
   await app.register(authRoutes, { prefix: "/api/auth" });
+  await app.register(taskRoutes, { prefix: "/api/tasks" });
 
   return app;
 }
