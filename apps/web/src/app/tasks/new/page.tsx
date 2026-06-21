@@ -7,10 +7,19 @@ export default function NewTaskPage() {
   return (
     <>
       <NavBar />
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Create Task</h1>
+      <main className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+        <div className="mb-4">
+          <p className="text-sm font-medium text-emerald-700">Tasks</p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
+            Create task
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+            Schedule a repeatable agent run with clear instructions, runtime
+            limits, and failure notification settings.
+          </p>
+        </div>
         <TaskForm />
-      </div>
+      </main>
     </>
   );
 }

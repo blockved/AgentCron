@@ -1,5 +1,7 @@
 "use client";
 
+import { RunStatusBadge } from "./status-badge";
+
 interface TimelineProps {
   run: {
     status: string;
@@ -17,35 +19,33 @@ export function RunTimeline({ run }: TimelineProps) {
     { label: "Finished", time: run.finishedAt, active: !!run.finishedAt },
   ];
 
-  const statusColor: Record<string, string> = {
-    PENDING: "bg-yellow-100 text-yellow-800",
-    RUNNING: "bg-blue-100 text-blue-800",
-    SUCCESS: "bg-green-100 text-green-800",
-    FAILED: "bg-red-100 text-red-800",
-    TIMEOUT: "bg-orange-100 text-orange-800",
-    CANCELLED: "bg-gray-100 text-gray-800",
-    SYSTEM_ERROR: "bg-red-100 text-red-800",
-  };
-
   return (
-    <div className="bg-white rounded-lg border p-4">
-      <div className="flex items-center gap-2 mb-4">
-        <span className={`px-3 py-1 text-sm font-medium rounded-full ${statusColor[run.status] || "bg-gray-100"}`}>
-          {run.status}
+    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <RunStatusBadge status={run.status} />
+          {run.duration !== null && (
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600">
+              {run.duration}s elapsed
+            </span>
+          )}
+        </div>
+        <span className="text-xs font-medium uppercase text-slate-400">
+          Execution timeline
         </span>
-        {run.duration !== null && (
-          <span className="text-sm text-gray-500">{run.duration}s</span>
-        )}
       </div>
-      <div className="flex items-center gap-4">
+      <div className="grid gap-4 md:grid-cols-3">
         {steps.map((step, i) => (
-          <div key={step.label} className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${step.active ? "bg-blue-500" : "bg-gray-300"}`} />
-            <div>
-              <p className="text-xs text-gray-500">{step.label}</p>
-              <p className="text-xs">{step.time ? new Date(step.time).toLocaleString() : "-"}</p>
+          <div
+            key={step.label}
+            className="relative flex items-center gap-3 rounded-md border border-slate-100 bg-slate-50 px-3 py-3"
+          >
+            <div className={`h-3 w-3 rounded-full ${step.active ? "bg-emerald-500" : "bg-slate-300"}`} />
+            <div className="min-w-0">
+              <p className="text-xs font-medium uppercase text-slate-400">{step.label}</p>
+              <p className="mt-1 truncate text-sm text-slate-700">{step.time ? new Date(step.time).toLocaleString() : "-"}</p>
             </div>
-            {i < steps.length - 1 && <div className="w-8 h-px bg-gray-300" />}
+            {i < steps.length - 1 && <div className="hidden h-px flex-1 bg-slate-200 md:block" />}
           </div>
         ))}
       </div>

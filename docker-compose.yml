@@ -2,7 +2,7 @@ services:
   mysql:
     image: mysql:8.0
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT:-3306}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password}
       MYSQL_DATABASE: agentcron
@@ -28,16 +28,23 @@ services:
       PORT: "3000"
     volumes:
       - agentcron-data:/data
+      - /root/.codex:/root/.codex
+      - /root/go/src:/root/go/src
     depends_on:
       mysql:
         condition: service_healthy
+    command: sh -c "cd /app/apps/api && pnpm exec prisma db push --schema=../../prisma/schema.prisma && node seed.mjs && node dist/index.js"
 
   web:
     build:
       context: .
       target: web
+      args:
+        API_INTERNAL_URL: http://api:3000
     ports:
       - "3001:3000"
+    environment:
+      API_INTERNAL_URL: http://api:3000
     depends_on:
       - api
 

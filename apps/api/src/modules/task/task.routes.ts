@@ -41,21 +41,21 @@ export default async function taskRoutes(app: FastifyInstance) {
     return { code: 0, data: null, message: "ok", traceId: request.traceId };
   });
 
-  app.post("/:id\\:enable", async (request) => {
+  app.post("/:id/enable", async (request) => {
     const { id } = request.params as { id: string };
     const userId = request.currentUser.role === "admin" ? undefined : BigInt(request.currentUser.userId as unknown as string);
     const task = await taskService.enable(BigInt(id), userId);
     return { code: 0, data: taskService.serialize(task), message: "ok", traceId: request.traceId };
   });
 
-  app.post("/:id\\:disable", async (request) => {
+  app.post("/:id/disable", async (request) => {
     const { id } = request.params as { id: string };
     const userId = request.currentUser.role === "admin" ? undefined : BigInt(request.currentUser.userId as unknown as string);
     const task = await taskService.disable(BigInt(id), userId);
     return { code: 0, data: taskService.serialize(task), message: "ok", traceId: request.traceId };
   });
 
-  app.post("/:id\\:trigger", async (request) => {
+  app.post("/:id/trigger", async (request) => {
     const { id } = request.params as { id: string };
     const task = await taskService.getById(BigInt(id));
     if (!task) throw Object.assign(new Error("Task not found"), { statusCode: 404 });
@@ -69,6 +69,16 @@ export default async function taskRoutes(app: FastifyInstance) {
         attemptNo: 1,
       },
     });
-    return { code: 0, data: { ...run, id: run.id.toString(), taskId: run.taskId.toString() }, message: "ok", traceId: request.traceId };
+    return {
+      code: 0,
+      data: {
+        ...run,
+        id: run.id.toString(),
+        taskId: run.taskId.toString(),
+        triggeredById: run.triggeredById?.toString() ?? null,
+      },
+      message: "ok",
+      traceId: request.traceId,
+    };
   });
 }

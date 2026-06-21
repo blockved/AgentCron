@@ -1,6 +1,7 @@
 {
   "name": "agentcron",
   "private": true,
+  "packageManager": "pnpm@10.12.1",
   "scripts": {
     "dev:api": "pnpm --filter @agentcron/api dev",
     "dev:web": "pnpm --filter @agentcron/web dev",
@@ -16,6 +17,7 @@
     "node": ">=20.0.0"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "@prisma/client": "^6.0.0",
     "prisma": "^6.0.0"
   },

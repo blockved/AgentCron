@@ -22,10 +22,16 @@ export class CodexAdapter implements AgentAdapter {
     environment: Record<string, string>;
     permissionPolicy: Record<string, unknown>;
   }): AdapterResult {
-    const args = ["--quiet", "--prompt", params.prompt];
-    if (params.permissionPolicy?.autoApprove) {
-      args.push("--auto-approve");
-    }
+    const args = [
+      "--dangerously-bypass-approvals-and-sandbox",
+      "exec",
+      "--json",
+      "--skip-git-repo-check",
+      "--cd",
+      params.workDir,
+    ];
+    args.push(params.prompt);
+
     return {
       command: "codex",
       args,

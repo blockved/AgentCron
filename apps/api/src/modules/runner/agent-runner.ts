@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { mkdir } from "node:fs/promises";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import type { PrismaClient } from "@prisma/client";
 import { RunStatus, DEFAULTS, decrypt } from "@agentcron/shared";
 import { RunStateMachine } from "../run/run-state-machine.js";
@@ -31,7 +31,10 @@ export class AgentRunner implements AgentRunnerInterface {
       return;
     }
 
-    const workDir = join(this.dataDir, "workspaces", runId.toString());
+    const configuredProject = run.task.project?.trim();
+    const workDir = configuredProject
+      ? resolve(configuredProject.replace(/^~(?=$|\/)/, process.env.HOME || ""))
+      : join(this.dataDir, "workspaces", runId.toString());
     await mkdir(workDir, { recursive: true });
 
     const prompt = decrypt(run.task.taskPrompt, this.masterKey);
@@ -62,12 +65,34 @@ export class AgentRunner implements AgentRunnerInterface {
       setTimeout(() => { if (!child.killed) child.kill("SIGKILL"); }, DEFAULTS.GRACEFUL_SHUTDOWN_MS);
     }, timeoutMs);
 
-    child.on("exit", async (code, signal) => {
+    let handledProcessError = false;
+    const cleanup = async () => {
       clearTimeout(timeoutTimer);
       clearInterval(heartbeat);
       this.heartbeatTimers.delete(key);
       this.processes.delete(key);
       await this.logCollector.flush(runId);
+    };
+
+    child.on("error", async (error) => {
+      handledProcessError = true;
+      await cleanup();
+      const message = error instanceof Error ? error.message : String(error);
+      log("error", "runner", "process failed to start", { runId: key, error: message });
+      this.logCollector.append(runId, "system", `Process failed to start: ${message}`);
+      await this.logCollector.flush(runId);
+      try {
+        await this.stateMachine.transition(runId, RunStatus.SYSTEM_ERROR, {
+          errorMessage: message,
+        });
+      } catch (e) {
+        log("error", "runner", "transition failed", { runId: key, error: String(e) });
+      }
+    });
+
+    child.on("exit", async (code, signal) => {
+      if (handledProcessError) return;
+      await cleanup();
 
       let targetStatus: string;
       const context: Record<string, unknown> = {};

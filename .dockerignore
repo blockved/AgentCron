@@ -1,0 +1,17 @@
+.git
+.claude
+node_modules
+apps/*/node_modules
+packages/*/node_modules
+dist
+apps/*/dist
+packages/*/dist
+.next
+apps/*/.next
+data
+*.log
+.env
+.env.*
+!.env.example
+Dockerfile
+docker-compose.yml

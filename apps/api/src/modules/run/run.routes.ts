@@ -72,13 +72,13 @@ export default async function runRoutes(app: FastifyInstance) {
     request.raw.on("close", () => { clearInterval(interval); });
   });
 
-  app.post("/:id\\:cancel", async (request) => {
+  app.post("/:id/cancel", async (request) => {
     const { id } = request.params as { id: string };
     const run = await runService.cancel(BigInt(id));
     return { code: 0, data: { ...run, id: run.id.toString(), taskId: run.taskId.toString() }, message: "ok", traceId: request.traceId };
   });
 
-  app.post("/:id\\:rerun", async (request) => {
+  app.post("/:id/rerun", async (request) => {
     const { id } = request.params as { id: string };
     const userId = BigInt(request.currentUser.userId as unknown as string);
     const data = await runService.rerun(BigInt(id), userId);
